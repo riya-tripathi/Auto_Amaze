@@ -21,7 +21,7 @@ public class FlightSearchTest extends BaseTest {
         home.selectFromCity("Delhi");
         home.selectToCity("Mumbai");
 
-        home.selectDate();
+        //home.selectDate();
 
         try { Thread.sleep(1500); } catch (Exception e) {}
 

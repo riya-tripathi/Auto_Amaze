@@ -21,7 +21,6 @@ public class HomePage {
     // Locators
     By fromCity = By.xpath("//input[@placeholder='Where from?']");
     By toCity = By.xpath("//input[@placeholder='Where to?']");
-    By datePicker = By.xpath("//input[contains(@placeholder,'Depart')]");
     By searchBtn = By.xpath("//button[contains(text(),'Search')]");
 
     // ✅ Popup Handler (FIXED)
@@ -140,62 +139,60 @@ public class HomePage {
     // ✅ DATE (FINAL STABLE VERSION)
     public void selectDate() {
 
-        // 🔥 wait for page to stabilize after city selection
         wait.waitForPageStability();
 
-        // 🔥 NEW stable locator (Cleartrip updated UI)
-        By dateInputLocator = By.xpath("//div[contains(@class,'DatePicker')]//input");
+        // ✅ Step 1: Click "Depart" text section (NOT input)
+        By departSection = By.xpath("//*[text()='Depart']/ancestor::div[contains(@class,'sc-')]");
 
-        WebElement dateInput = wait.waitForClickable(dateInputLocator);
+        WebElement depart = wait.waitForClickable(departSection);
 
         ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center'});", dateInput);
+                "arguments[0].scrollIntoView({block:'center'});", depart);
 
         try {
-            dateInput.click();
+            depart.click();
         } catch (Exception e) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateInput);
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", depart);
         }
 
-        // wait for calendar
+        // ✅ Step 2: Wait for calendar
         By calendar = By.xpath("//div[@role='grid']");
         wait.waitForVisible(calendar);
 
-        // get all enabled dates
-        By allDates = By.xpath("//div[@role='gridcell' and @aria-disabled='false']");
-        List<WebElement> dates = wait.waitForAllElements(allDates);
+        // ✅ Step 3: Select future date
+        By availableDates = By.xpath("//div[@role='gridcell' and @aria-disabled='false']");
 
-        int randomIndex = new java.util.Random().nextInt(dates.size());
-        WebElement randomDate = dates.get(randomIndex);
+        List<WebElement> dates = wait.waitForAllElements(availableDates);
 
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center'});", randomDate);
+        // avoid today's edge case
+        dates.get(1).click();
 
-        try {
-            randomDate.click();
-        } catch (Exception e) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", randomDate);
-        }
-
-        System.out.println("✅ Random future date selected");
+        System.out.println("✅ Date selected");
     }
 
     public void clickSearch() {
 
+        wait.waitForPageStability();
+
+        // ✅ Strong locator (text-based)
+        By searchBtn = By.xpath("//button[.//text()='Search' or contains(.,'Search')]");
+
         WebElement search = wait.waitForClickable(searchBtn);
 
-        // 🔥 bring to center (avoid header overlap)
+        // ✅ Bring to center (avoid header/overlay issues)
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center'});", search);
 
-        wait.waitForPageStability();
+        // ✅ Small stability wait
+        wait.waitForMilliseconds(500);
 
         try {
             search.click();
         } catch (Exception e) {
+            // 🔥 fallback (very important)
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", search);
         }
 
-        System.out.println("✅ Search clicked");
+        System.out.println("✅ Search button clicked");
     }
 }
