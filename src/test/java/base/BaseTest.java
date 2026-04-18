@@ -1,34 +1,35 @@
-package tests;
+package base;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import pages.HomePage;
-import pages.SearchResultsPage;
-import base.BaseTest;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
 
-public class FlightSearchTest extends BaseTest {
+public class BaseTest {
 
-    @Test
-    public void testFlightSearch() {
+    protected WebDriver driver;
 
-        driver.get("https://www.cleartrip.com/");
+    @BeforeMethod
+    public void setup() {
 
-        HomePage home = new HomePage(driver);
+        ChromeOptions options = new ChromeOptions();
 
-        // 🔥 Critical step
-        home.handlePopup();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.addArguments("--disable-notifications");
+        options.addArguments("--incognito");
 
-        home.selectFromCity("Delhi");
-        home.selectToCity("Mumbai");
+        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        options.setExperimentalOption("useAutomationExtension", false);
 
-        home.selectDate();
+        driver = new ChromeDriver(options);
+    }
 
-        try { Thread.sleep(1500); } catch (Exception e) {}
-
-        home.clickSearch();
-
-        SearchResultsPage results = new SearchResultsPage(driver);
-
-        Assert.assertTrue(results.isResultsDisplayed());
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
